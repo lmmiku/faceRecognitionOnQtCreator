@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>black.png</file>
+        <file>blue.png</file>
+        <file>close.png</file>
+        <file>max.png</file>
+        <file>max1.png</file>
+        <file>min.png</file>
+        <file>faceRecongnition.png</file>
+        <file>faceImage.jpg</file>
+        <file>button_image.png</file>
+        <file>980.jpg</file>
+    </qresource>
+</RCC>

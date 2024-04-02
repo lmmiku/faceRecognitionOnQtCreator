@@ -45,7 +45,7 @@ managementInfo::managementInfo(QString account,QWidget*parent):QWidget(parent),u
             qDebug()<<row;
             if (row != -1){
                 DeleteFileOrFolder(QString("video/"+ui->infomation->item(row,0)->text()+"_"+ui->infomation->item(row,2)->text()));
-                DataBase::instance()->deleteUserFromStuinfo(ui->infomation->item(row,2)->text());
+                DataBase::instance()->deleteUserFromStuInfo(ui->infomation->item(row,2)->text());
                 ui->infomation->removeRow(row);
             }
         }

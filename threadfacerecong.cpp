@@ -24,6 +24,7 @@ void threadFaceRecong::faceIdentification(){
     cv::RNG g_rng(12345);
 
     while(!isStop){
+
         cap>>frame;
         if(frame.empty() || isStop){
             qDebug()<<"faceRecong获取为空"<<"摄像头状态："<<cap.isOpened()<<"isStop = "<<isStop;;
@@ -33,11 +34,7 @@ void threadFaceRecong::faceIdentification(){
         cvtColor(frame, gray, CV_RGB2GRAY);//测试图像必须为灰度图
         equalizeHist(gray, gray); //变换后的图像进行直方图均值化处理
         //检测人脸
-        cascade.detectMultiScale(gray, faces,1.1, 4, 0
-                                                          //|CV_HAAR_FIND_BIGGEST_OBJECT
-                                                          | CV_HAAR_DO_ROUGH_SEARCH,
-                                 //| CV_HAAR_SCALE_IMAGE,
-                                 cv::Size(30, 30), cv::Size(500, 500));
+        cascade.detectMultiScale(gray, faces,1.1, 4, 0|CV_HAAR_DO_ROUGH_SEARCH,cv::Size(30, 30), cv::Size(500, 500));
         cv::Mat* pImage_roi = new cv::Mat[faces.size()];    //定以数组
         cv::Mat face;
         cv::Point text_lb;//文本写在的位置

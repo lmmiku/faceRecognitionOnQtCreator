@@ -132,7 +132,7 @@ QVector<QString> DataBase::getInfoFromAdminInfo(QString account){
     return idInfo;
 }
 
-bool DataBase::deleteUserFromStuinfo(QString stuNumber){
+bool DataBase::deleteUserFromStuInfo(QString stuNumber){
     QString del = QString("DELETE FROM stuInfo WHERE stuNumber = '%1'").arg(stuNumber);
     if(!query.exec(del)){
         qDebug()<<"Error:deleteUserFromStuinfo->Fail to delete data. " << query.lastError();
@@ -150,6 +150,26 @@ QVector<QString> DataBase::getClassFromAdminInfo(QString account){
         classInfo.append(query.value(0).toString());
     }
     return classInfo;
+}
+
+bool DataBase::updataStateForAttendanceInfo(QString stuNumber,QString state){
+    QString updata = QString("UPDATE attendanceInfo SET state = '%1' WHERE stuId = '%2'").arg(state).arg(stuNumber);
+    if(!query.exec(updata)){
+        qDebug()<<"Error:deleteUserFromStuinfo->Fail to delete data. " << query.lastError();
+    }else{
+        return true;
+    }
+    return false;
+}
+
+bool DataBase::insertToAttendanceInfo(QString stuNumber,QString state,QString time){
+    QString insert = QString("INSERT INTO attendanceInfo (stuId,state,time) VALUES('%1','%2','%3')").arg(stuNumber).arg(state).arg(time);
+    if(!query.exec(updata)){
+        qDebug()<<"Error:deleteUserFromStuinfo->Fail to delete data. " << query.lastError();
+    }else{
+        return true;
+    }
+    return false;
 }
 
 DataBase::~DataBase(){

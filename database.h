@@ -30,7 +30,11 @@ public:
     //通过id获取考勤状态
     QString getStateFromId(int id);
     //通过学号删除用户
-    bool deleteUserFromStuinfo(QString stuNumber);
+    bool deleteUserFromStuInfo(QString stuNumber);
+    //修改打卡状态
+    bool updataStateForAttendanceInfo(QString stuNumber,QString state);
+    //插入打卡记录
+    bool insertToAttendanceInfo(QString stuNumber,QString state,QString time);
 
 private:
     DataBase();

@@ -61,7 +61,7 @@ faceRecongnition::faceRecongnition(QString account,QWidget *parent): QWidget(par
         connect(informationEntry,&InformationEntry::entrySuccess,this,[=](){
             emit startFaceRecord(informationEntry->getUi()->name->text(),informationEntry->getUi()->gender->text()\
                                  ,informationEntry->getUi()->stuNumber->text(),informationEntry->getUi()->age->text()\
-                                 ,DataBase::instance()->getClassFromAdminInfo(account)[0]);
+                                 ,informationEntry->getUi()->classes->text());
             informationEntry->hide();
         });
     });

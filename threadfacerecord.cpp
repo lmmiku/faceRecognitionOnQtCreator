@@ -21,7 +21,6 @@ void threadFaceRecord::faceRecord(QString name,QString gender,QString number,QSt
     }
     live->bioassay();
     while(isLiving){
-        qDebug()<<"----";
         if(cap.open(0)){
             qDebug()<<"faceRecord相机成功打开";
             this->isStop = false;
@@ -34,39 +33,37 @@ void threadFaceRecord::faceRecord(QString name,QString gender,QString number,QSt
                 qDebug()<<"faceRecord获取为空"<<"摄像头状态："<<cap.isOpened()<<"isStop = "<<isStop;
                     return;
             }
+            std::vector<cv::Rect> faces;//vector容器存检测到的faces
+            cv::Mat frame_gray;
+            cvtColor(frame, frame_gray, cv::COLOR_BGR2GRAY);//转灰度化，减少运算
+            cascade.detectMultiScale(frame_gray, faces, 1.1, 4, CV_HAAR_DO_ROUGH_SEARCH, cv::Size(70, 70), cv::Size(1000, 1000));
 
-            qDebug()<<HOG_SVM->predict(frame);
-
-//            std::vector<cv::Rect> faces;//vector容器存检测到的faces
-//            cv::Mat frame_gray;
-//            cvtColor(frame, frame_gray, cv::COLOR_BGR2GRAY);//转灰度化，减少运算
-//            cascade.detectMultiScale(frame_gray, faces, 1.1, 4, CV_HAAR_DO_ROUGH_SEARCH, cv::Size(70, 70), cv::Size(1000, 1000));
-//            //qDebug()<<QString("检测到人脸个数：%1").arg(faces.size());
-//            //识别到的脸用矩形圈出
-//            for (unsigned int i = 0; i < faces.size(); i++)
-//            {
-//                cv::rectangle(frame, faces[i], cv::Scalar(255, 0, 0), 2, 8, 0);
-//            }
-//            //当只有一个人脸时，开始拍照
-//            if (faces.size() == 1){
-//                cv::Mat faceROI = frame_gray(faces[0]);//在灰度图中将圈出的脸所在区域裁剪出
-//                cv::resize(faceROI, myFace, cv::Size(92, 112));//将兴趣域size为92*112
-//                putText(frame, QString::number(pic_num).toStdString(), faces[0].tl(), 3, 1.2, (0, 0, 225), 2, 0);//在 faces[0].tl()的左上角上面写序号
-//                QString filename = QString(videoPath+name+"_"+number+"/%1.jpg").arg(pic_num); //图片的存放位置，frmat的用法跟QString差不对
-//                cv::imwrite(filename.toLocal8Bit().toStdString(), myFace);//存在当前目录下
-//                //cv::imshow(filename.toStdString(), myFace);//显示下size后的脸
-//                QThread::usleep(100);//等待100us
-//                cv::destroyWindow(filename.toLocal8Bit().toStdString());//:销毁指定的窗口
-//                pic_num++;//序号加1
-//                if (pic_num == 11){
-//                    int label = this->append_csv(name+"_"+number);
-//                    this->faceTrain();
-//                    DataBase::instance()->addToStuInfo(label,name,gender,number,age.toInt(),c);
-//                    return;//当序号为11时退出循环,一共拍10张照片
-//                }
-//            }
-//            emit imageToRecord(Mat2Image(frame));
-//            QThread::usleep(100);//等待100us
+            //qDebug()<<QString("检测到人脸个数：%1").arg(faces.size());
+            //识别到的脸用矩形圈出
+            for (unsigned int i = 0; i < faces.size(); i++)
+            {
+                cv::rectangle(frame, faces[i], cv::Scalar(255, 0, 0), 2, 8, 0);
+            }
+            //当只有一个人脸时，开始拍照
+            if (faces.size() == 1 && HOG_SVM->predict(frame) == 1){
+                cv::Mat faceROI = frame_gray(faces[0]);//在灰度图中将圈出的脸所在区域裁剪出
+                cv::resize(faceROI, myFace, cv::Size(92, 112));//将兴趣域size为92*112
+                putText(frame, QString::number(pic_num).toStdString(), faces[0].tl(), 3, 1.2, (0, 0, 225), 2, 0);//在 faces[0].tl()的左上角上面写序号
+                QString filename = QString(videoPath+name+"_"+number+"/%1.jpg").arg(pic_num); //图片的存放位置，frmat的用法跟QString差不对
+                cv::imwrite(filename.toLocal8Bit().toStdString(), myFace);//存在当前目录下
+                //cv::imshow(filename.toStdString(), myFace);//显示下size后的脸
+                QThread::usleep(100);//等待100us
+                cv::destroyWindow(filename.toLocal8Bit().toStdString());//:销毁指定的窗口
+                pic_num++;//序号加1
+                if (pic_num == 11){
+                    int label = this->append_csv(name+"_"+number);
+                    this->faceTrain();
+                    DataBase::instance()->addToStuInfo(label,name,gender,number,age.toInt(),c);
+                    return;//当序号为11时退出循环,一共拍10张照片
+                }
+            }
+            emit imageToRecord(Mat2Image(frame));
+            QThread::usleep(100);//等待100us
 //            //qDebug()<<"faceRecord 正在运行" <<"isStop == "<<isStop;
         }
 

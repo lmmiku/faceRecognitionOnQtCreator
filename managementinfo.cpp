@@ -49,8 +49,44 @@ managementInfo::managementInfo(QString account,QWidget*parent):QWidget(parent),u
                 ui->infomation->removeRow(row);
             }
         }
-
     });
+
+    //导出考勤情况表
+    connect(ui->derive,&QPushButton::clicked,this,[=](){
+        this->deriveTab();
+    });
+}
+
+void managementInfo::deriveTab(){
+    QString filePath = QFileDialog::getSaveFileName(this,tr("导出报表"),".",tr("*.xlsx"));
+    if(!filePath.isEmpty()){
+        QAxObject *excel = new QAxObject(this);
+        excel->setControl("Excel.Application");   //连接excel控件
+        excel->dynamicCall("SetVisible (bool Visible)","false");  //不显示窗体
+        excel->setProperty("DisplayAlerts",false); //不显示警告信息
+        QAxObject *workBooks = excel->querySubObject("WorkBooks");  //获取工作簿集合
+        workBooks->dynamicCall("Add");  //新建工作簿
+        QAxObject *workBook = excel->querySubObject("ActiveWorkBook");  //获取当前工作簿
+        QAxObject *workSheets = workBook->querySubObject("Sheets");  //获取工作表集合
+        QAxObject *workSheet = workSheets->querySubObject("Item(int)",1);  //获取工作表集合的工作表1(sheet1)
+        //设置表头值
+        for(int i = 1 ;i<ui->infomation->columnCount()+1;i++){
+            QAxObject *range = workSheet->querySubObject("Cells(int,int)",1,i);
+            range->dynamicCall("SetValue(const QString &)",ui->infomation->horizontalHeaderItem(i-1)->text());
+        }
+        //设置表格数据
+        for(int i = 1;i<ui->infomation->rowCount()+1;i++){
+            for(int j = 1;j<ui->infomation->columnCount()+1;j++){
+                QAxObject *range = workSheet->querySubObject("Cells(int,int)",i+1,j);
+                range->dynamicCall("SetValue(const QString &)",ui->infomation->item(i-1,j-1)->data(Qt::DisplayRole).toString());
+            }
+        }
+        workBook->dynamicCall("SaveAs(const QString &)",QDir::toNativeSeparators(filePath));  //保存值filepath
+        workBook->dynamicCall("Close()");  //关闭工作簿
+        excel->dynamicCall("Quit()");  //关闭excel
+        delete excel;
+        excel = nullptr;
+    }
 }
 
 void managementInfo::initial(){

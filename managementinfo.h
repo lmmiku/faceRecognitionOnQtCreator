@@ -9,6 +9,9 @@
 #include <tuple>
 #include <QtCharts>
 #include <QGraphicsDropShadowEffect>
+#include <QTableWidget>
+#include "QFileDialog"
+#include <ActiveQt/QAxObject>
 #include "database.h"
 namespace Ui {
 class managementInfo;
@@ -38,6 +41,8 @@ public:
     void widgetOut(QWidget *target);
     //设置ui样式
     void setUiStyle();
+    //导出数据为excel表格
+    void deriveTab();
 signals:
     void returnWidget();
 private:

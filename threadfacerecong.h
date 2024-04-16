@@ -9,6 +9,9 @@
 #include <QImage>
 #include <QDebug>
 #include <QThread>
+#include <QMessageBox>
+#include <QDateTime>
+#include <QTimer>
 
 #include "database.h"
 
@@ -29,6 +32,8 @@ private:
     cv::CascadeClassifier cascade;
     bool isStop = false;
     cv::VideoCapture cap;
+
+    QMessageBox *message;
 };
 
 #endif // THREADFACERECONG_H

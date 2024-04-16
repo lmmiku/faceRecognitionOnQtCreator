@@ -233,6 +233,19 @@
        <string>删除用户</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="derive">
+      <property name="geometry">
+       <rect>
+        <x>700</x>
+        <y>80</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>导出考勤表</string>
+      </property>
+     </widget>
     </widget>
    </item>
   </layout>

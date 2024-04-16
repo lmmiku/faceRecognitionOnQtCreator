@@ -4,6 +4,7 @@ threadFaceRecong::threadFaceRecong(){
     this->model = cv::face::LBPHFaceRecognizer::create();
     model->read("MyFaceLBPHModel.xml");
     cascade.load("C:/Users/shocker//QTpractise/face_recognition/haarcascade_frontalface_alt2.xml");
+    message = new QMessageBox();
 }
 
 void threadFaceRecong::stopFaceRecong(){
@@ -24,7 +25,7 @@ void threadFaceRecong::faceIdentification(){
     cv::RNG g_rng(12345);
 
     while(!isStop){
-
+        QVector<QString> countFace;
         cap>>frame;
         if(frame.empty() || isStop){
             qDebug()<<"faceRecong获取为空"<<"摄像头状态："<<cap.isOpened()<<"isStop = "<<isStop;;
@@ -59,10 +60,27 @@ void threadFaceRecong::faceIdentification(){
             str = DataBase::instance()->getInfoFromStuInfo(Predict(pImage_roi[i])).toLocal8Bit().toStdString();
             if(str == ""){
                 str = "ERROR";
+            }else{
+                countFace.append(QString::fromStdString(str));
+                if(countFace.size()>10){
+                    if(countFace.count(QString::fromStdString(str)) >= 9){
+//                        QMessageBox::information(nullptr,"打卡成功",QString::fromStdString(str)+",打卡成功!\n时间："+\
+//                                        QDateTime::currentDateTime().toString("hh:mm:ss"));
+                        message->information(nullptr,"打卡成功",QString::fromStdString(str)+",打卡成功!\n时间："+\
+                                        QDateTime::currentDateTime().toString("hh:mm:ss"));
+                        message->show();
+                        QTimer::singleShot(800,[=](){
+                            message->hide();
+                            message->close();
+                        });
+                    }
+
+                }
             }
             cv::Scalar color = cv::Scalar(g_rng.uniform(0, 255), g_rng.uniform(0, 255), g_rng.uniform(0, 255));//所取的颜色任意值
             rectangle(frame, cv::Point(faces[i].x, faces[i].y), cv::Point(faces[i].x + faces[i].width, faces[i].y + faces[i].height), color, 1, 8);//放入缓存
             putText(frame, str, text_lb, cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255));//添加文字
+
         }
         delete[] pImage_roi;
         emit imageToRecong(Mat2Image(frame));

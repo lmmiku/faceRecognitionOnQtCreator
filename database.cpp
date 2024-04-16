@@ -164,7 +164,7 @@ bool DataBase::updataStateForAttendanceInfo(QString stuNumber,QString state){
 
 bool DataBase::insertToAttendanceInfo(QString stuNumber,QString state,QString time){
     QString insert = QString("INSERT INTO attendanceInfo (stuId,state,time) VALUES('%1','%2','%3')").arg(stuNumber).arg(state).arg(time);
-    if(!query.exec(updata)){
+    if(!query.exec(insert)){
         qDebug()<<"Error:deleteUserFromStuinfo->Fail to delete data. " << query.lastError();
     }else{
         return true;

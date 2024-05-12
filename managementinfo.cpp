@@ -107,7 +107,7 @@ void managementInfo::initial(){
         ui->infomation->setItem(rowCount,2,new QTableWidgetItem(std::get<3>(info)));
         ui->infomation->setItem(rowCount,3,new QTableWidgetItem(QString::number(std::get<4>(info))));
         ui->infomation->setItem(rowCount,4,new QTableWidgetItem(std::get<5>(info)));
-        QString state = DataBase::instance()->getStateFromId(std::get<0>(info));
+        QString state = DataBase::instance()->getStateFromId(std::get<3>(info));
         ui->infomation->setItem(rowCount,5,new QTableWidgetItem(state));
         if("已打卡" == state){
             state1++;

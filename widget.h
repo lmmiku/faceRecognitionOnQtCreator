@@ -61,16 +61,19 @@ public:
 
     //重写界面出现事件
     void showEvent(QShowEvent *event);
-
     //界面关闭
     void widgetOut(QWidget*target);
-
     //初始化
     void initial();
     //ui样式
     void setUiStyle();
-
     bool eventFilter(QObject *watched, QEvent *event);
+    //打卡成功槽函数
+    void punchSuccess(QString stuNumber);
+    //迟到槽函数
+    void punchFailed(QString stuNumber);
+    //未注册槽函数
+    void punchNull();
 
     ~Widget();
 signals:
@@ -100,9 +103,10 @@ private:
 
     //登录窗口
     AdminLogin *adminLogin = nullptr;
-
     QMessageBox *message;
-
+    //12个月的缩写
+    QString mouth[12] ={"Jan","Feb","Mar","Apr","May",
+                         "June","July","Aug","Sept","Oct","Nov","Dec"};
 };
 
 

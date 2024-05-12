@@ -107,8 +107,8 @@ std::tuple<int,QString,QString,QString,int,QString> DataBase::getInfoFromId(QStr
     return info;
 }
 
-QString DataBase::getStateFromId(int id){
-    QString select = QString("SELECT state FROM attendanceInfo WHERE id = '%1'").arg(id);
+QString DataBase::getStateFromId(QString stuNumber){
+    QString select = QString("SELECT state FROM attendanceInfo WHERE stuNumber = '%1'").arg(stuNumber);
     if(!query.exec(select)){
         qDebug()<<"Error:getStateFromId->Fail to select data. " << query.lastError();
     }else{
@@ -162,11 +162,67 @@ bool DataBase::updataStateForAttendanceInfo(QString stuNumber,QString state){
     return false;
 }
 
+int DataBase::getId_stuNumber(QString stuNumber){
+    QString select = QString("SELECT id FROM stuInfo WHERE stuNumber = '%1'").arg(stuNumber);
+    query.exec(select);
+    if(query.next()){
+        return query.value(0).toInt();
+    }
+    return -1;
+}
+
 bool DataBase::insertToAttendanceInfo(QString stuNumber,QString state,QString time){
-    QString insert = QString("INSERT INTO attendanceInfo (stuId,state,time) VALUES('%1','%2','%3')").arg(stuNumber).arg(state).arg(time);
-    if(!query.exec(insert)){
+    QString string;
+    if(getExist(stuNumber)){
+        string = QString("UPDATE attendanceInfo SET state = '%1' WHERE stuNumber = '%2'").arg(state).arg(stuNumber);
+    }else{
+        string = QString("INSERT INTO attendanceInfo (stuId,stuNumber,state,time) VALUES(%1,'%2','%3','%4')").arg(getId_stuNumber(stuNumber)).arg(stuNumber).arg(state).arg(time);
+    }
+    if(!query.exec(string)){
         qDebug()<<"Error:deleteUserFromStuinfo->Fail to delete data. " << query.lastError();
     }else{
+        return true;
+    }
+    return false;
+}
+
+QString DataBase::getStuNumber(int id){
+    QString select = QString("SELECT stuNumber FROM stuInfo WHERE id = %1").arg(id);
+    if(!query.exec(select)){
+        qDebug() << "Error:getInfoFromStuInfo->Fail to select data. " << query.lastError();
+    }else{
+        if(query.next()){
+            return query.value(0).toString();
+        }
+    }
+    return "";
+}
+
+QString DataBase::getName(QString stuNumber){
+    QString select = QString("SELECT stuName FROM stuInfo WHERE stuNumber = %1").arg(stuNumber);
+    if(!query.exec(select)){
+        qDebug() << "Error:getInfoFromStuInfo->Fail to select data. " << query.lastError();
+    }else{
+        if(query.next()){
+            return query.value(0).toString();
+        }
+    }
+    return "";
+}
+
+QDateTime DataBase::getTime_stuNumber(QString stuNumber){
+    QString select = QString("SELECT time FROM attendanceInfo WHERE stuNumber = '%1'").arg(stuNumber);
+    query.exec(select);
+    if(query.next()){
+        return query.value(0).toDateTime();
+    }
+    return QDateTime();
+}
+
+bool DataBase::getExist(QString stuNumber){
+    QString select = QString("SELECT * FROM attendanceInfo WHERE stuNumber = '%1'").arg(stuNumber);
+    query.exec(select);
+    if(query.next()){
         return true;
     }
     return false;

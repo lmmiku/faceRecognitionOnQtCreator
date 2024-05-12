@@ -38,6 +38,8 @@ private:
     cv::CascadeClassifier cascade;
     bool isStop = false;
     cv::VideoCapture cap;
+    //设定考勤时间
+    QDateTime setTime = QDateTime(QDate::currentDate(), QTime(8, 00, 00));
 };
 
 #endif // THREADFACERECONG_H

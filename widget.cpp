@@ -38,43 +38,29 @@ Widget::Widget(QWidget *parent)
         ui->viewFaceImage->setPixmap(QPixmap::fromImage(image));
     });
 
+    //显示时间
+    QTimer *timer = new QTimer();
+    connect(timer,&QTimer::timeout,this,[=](){
+        //获取当前时间
+        QString time = QDateTime::currentDateTime().toString("MM dd hh:mm dddd");
+        int mm = time.mid(0,2).toInt();
+        QString dd = time.mid(3,2);
+        QString hhmm = time.mid(6,5);
+        //显示时间
+        ui->time->setText(hhmm);
+        QString current_week = QDateTime::currentDateTime().toString("ddd");
+        QString data = current_week+" "+mouth[mm-1]+" "+dd;
+        ui->date->setText(data);
+    });
+    timer->start(1000);
+
     //打卡成功
-    connect(threadfacerecong,&threadFaceRecong::PunchSuccess,this,[=](QString name){
-        //                                QMessageBox::information(nullptr,"打卡成功",name+",打卡成功!\n时间："+\
-//                                        QDateTime::currentDateTime().toString("hh:mm:ss"));
-        if(!message->isVisible()){
-            message->information(nullptr,"打卡成功",name+",打卡成功!\n时间："+\
-                                        QDateTime::currentDateTime().toString("hh:mm:ss"));
-            message->show();
-        }
-        if(message == nullptr){
-            message = new QMessageBox();
-        }
-        QTimer::singleShot(800,[=](){
-            message->hide();
-            message->close();
-            delete message;
-            message = nullptr;
-        });
-    });
-    //打卡失败（迟到）
-    connect(threadfacerecong,&threadFaceRecong::PunchFailed,this,[=](QString name){
-        if(!message->isVisible()){
-            message->information(nullptr,"打卡成功","打卡成功,已迟到!\n时间："+\
-                                        QDateTime::currentDateTime().toString("hh:mm:ss"));
-            message->show();
-            disconnect(threadfacerecong,&threadFaceRecong::PunchSuccess,nullptr,nullptr);
-        }
-    });
+    connect(threadfacerecong,&threadFaceRecong::PunchSuccess,this,&Widget::punchSuccess);
+    //打卡成功（迟到）
+    connect(threadfacerecong,&threadFaceRecong::PunchFailed,this,&Widget::punchFailed);
     //打卡失败，未注册
-    connect(threadfacerecong,&threadFaceRecong::PunchNull,this,[=](){
-        if(!message->isVisible()){
-            message->information(nullptr,"打卡失败","打卡失败,未注册用户!\n时间："+\
-                                        QDateTime::currentDateTime().toString("hh:mm:ss"));
-            message->show();
-            disconnect(threadfacerecong,&threadFaceRecong::PunchSuccess,nullptr,nullptr);
-        }
-    });
+    connect(threadfacerecong,&threadFaceRecong::PunchNull,this,&Widget::punchNull);
+
     //关闭按钮功能
     connect(ui->close,&QPushButton::clicked,this,[=](){
         this->widgetOut(this);
@@ -105,6 +91,7 @@ Widget::Widget(QWidget *parent)
                 QTimer::singleShot(325,this,[=](){
                     this->hide();
                     faceRecong->show();
+                    threadfacerecong->stopFaceRecong();
                 });
                 //接收返回信号
                 disconnect(faceRecong,&faceRecongnition::returnWidget,nullptr,nullptr);
@@ -138,10 +125,70 @@ Widget::Widget(QWidget *parent)
                 QTimer::singleShot(200,this,[=](){
                     ui->viewFaceImage->setPixmap(QPixmap(":/faceImage.jpg"));
                 });
-
             }
-
         }
+    });
+}
+
+void Widget::punchSuccess(QString stuNumber){
+    disconnect(threadfacerecong,&threadFaceRecong::PunchSuccess,nullptr,nullptr);
+    disconnect(threadfacerecong,&threadFaceRecong::PunchFailed,nullptr,nullptr);
+    disconnect(threadfacerecong,&threadFaceRecong::PunchNull,nullptr,nullptr);
+    if(message == nullptr){
+        message = new QMessageBox();
+    }
+    if(!message->isVisible()){
+        message->setText(DataBase::instance()->getName(stuNumber)+",打卡成功!\n时间："+QDateTime::currentDateTime().toString("hh:mm:ss"));
+        DataBase::instance()->insertToAttendanceInfo(stuNumber,"已打卡",QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss"));
+        message->show();
+    }
+    QTimer::singleShot(2000,[=](){
+        message->hide();
+        //emit startFaceRecong();
+        connect(threadfacerecong,&threadFaceRecong::PunchSuccess,this,&Widget::punchSuccess);
+        connect(threadfacerecong,&threadFaceRecong::PunchFailed,this,&Widget::punchFailed);
+        connect(threadfacerecong,&threadFaceRecong::PunchNull,this,&Widget::punchNull);
+    });
+}
+
+void Widget::punchFailed(QString stuNumber){
+    disconnect(threadfacerecong,&threadFaceRecong::PunchSuccess,nullptr,nullptr);
+    disconnect(threadfacerecong,&threadFaceRecong::PunchFailed,nullptr,nullptr);
+    disconnect(threadfacerecong,&threadFaceRecong::PunchNull,nullptr,nullptr);
+    if(message == nullptr){
+        message = new QMessageBox();
+    }
+    if(!message->isVisible()){
+        message->setText(DataBase::instance()->getName(stuNumber)+",打卡成功,已迟到!\n时间："+QDateTime::currentDateTime().toString("hh:mm:ss"));
+        DataBase::instance()->insertToAttendanceInfo(stuNumber,"已迟到",QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss"));
+        message->show();
+    }
+    QTimer::singleShot(2000,[=](){
+        message->hide();
+        connect(threadfacerecong,&threadFaceRecong::PunchSuccess,this,&Widget::punchSuccess);
+        connect(threadfacerecong,&threadFaceRecong::PunchFailed,this,&Widget::punchFailed);
+        connect(threadfacerecong,&threadFaceRecong::PunchNull,this,&Widget::punchNull);
+        //emit startFaceRecong();
+    });
+}
+
+void Widget::punchNull(){
+    disconnect(threadfacerecong,&threadFaceRecong::PunchSuccess,nullptr,nullptr);
+    disconnect(threadfacerecong,&threadFaceRecong::PunchFailed,nullptr,nullptr);
+    disconnect(threadfacerecong,&threadFaceRecong::PunchNull,nullptr,nullptr);
+    if(message == nullptr){
+        message = new QMessageBox();
+    }
+    if(!message->isVisible()){
+        message->setText("打卡失败，未注册用户!\n时间："+QDateTime::currentDateTime().toString("hh:mm:ss"));
+        message->show();
+    }
+    QTimer::singleShot(2000,[=](){
+        message->hide();
+        connect(threadfacerecong,&threadFaceRecong::PunchSuccess,this,&Widget::punchSuccess);
+        connect(threadfacerecong,&threadFaceRecong::PunchFailed,this,&Widget::punchFailed);
+        connect(threadfacerecong,&threadFaceRecong::PunchNull,this,&Widget::punchNull);
+        //emit startFaceRecong();
     });
 }
 
@@ -151,7 +198,8 @@ void Widget::initial(){
     this->initialWidth = this->width();
     this->initialHeight = this->height();
     this->threadfacerecong = new threadFaceRecong();
-    message = new QMessageBox();
+    message = new QMessageBox(QMessageBox::Information, "打卡状态", "text", QMessageBox::NoButton);
+    message->setModal(false);
 //    this->net = cv::dnn::experimental_dnn_34_v14::readNetFromCaffe("C:/Users/shocker/QTpractise/face_recognition/Live/4_0_0_80x80_MiniFASNetV1SE.caffemodel",\
 //                                                                   "C:/Users/shocker/QTpractise/face_recognition/Live/deploy.prototxt");
 //    net.setPreferableBackend(cv::dnn::experimental_dnn_34_v14::DNN_BACKEND_OPENCV);

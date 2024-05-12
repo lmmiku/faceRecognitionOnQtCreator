@@ -5,6 +5,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QDebug>
+#include <QDateTime>
 #include <tuple>
 class DataBase
 {
@@ -16,6 +17,8 @@ public:
     int getLastIdFromStuInfo();
     //通过id值查找信息
     QString getInfoFromStuInfo(int id);
+    //通过id查找学号
+    QString getStuNumber(int id);
     //查询用户信息是否已添加
     bool inquiryInfo(QString number);
     //验证管理员账号密码是否正确
@@ -25,16 +28,24 @@ public:
     //通过管理员账号查找用户
     void extracted(QVector<QString> &classInfo, QVector<QString> &idInfo);
     QVector<QString> getInfoFromAdminInfo(QString account);
-    //通过id查找用户所有信息
+    //通过学号查找用户所有信息
     std::tuple<int,QString,QString,QString,int,QString> getInfoFromId(QString stuNumber);
     //通过id获取考勤状态
-    QString getStateFromId(int id);
+    QString getStateFromId(QString stuNumber);
     //通过学号删除用户
     bool deleteUserFromStuInfo(QString stuNumber);
     //修改打卡状态
     bool updataStateForAttendanceInfo(QString stuNumber,QString state);
     //插入打卡记录
     bool insertToAttendanceInfo(QString stuNumber,QString state,QString time);
+    //查看考勤表中是否存信息
+    bool getExist(QString stuNumber);
+    //通过学号获取id
+    int getId_stuNumber(QString stuNumber);
+    //通过学号获取打卡时间
+    QDateTime getTime_stuNumber(QString stuNumber);
+    //通过学号查找姓名
+    QString getName(QString stuNumber);
 
 private:
     DataBase();

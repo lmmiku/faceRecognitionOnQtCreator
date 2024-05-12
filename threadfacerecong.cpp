@@ -50,21 +50,27 @@ void threadFaceRecong::faceIdentification(){
             if (pImage_roi[0].empty())
                 continue;
             str = DataBase::instance()->getInfoFromStuInfo(Predict(pImage_roi[0])).toLocal8Bit().toStdString();
-            QString name = DataBase::instance()->getInfoFromStuInfo(Predict(pImage_roi[0]));
+            QString stuNumber = DataBase::instance()->getStuNumber(Predict(pImage_roi[0]));
             if(str == ""){
                 str = "ERROR";
-                //emit PunchNull();
+                emit PunchNull();
+                //break;
             }else{
-
+                QDateTime startTime = QDateTime::currentDateTime();
+                if(startTime.secsTo(setTime) < 0){ // 计算时间差（秒）,负数说明超过早上八点
+                    emit PunchFailed(stuNumber);
+                }else{
+                    emit PunchSuccess(stuNumber);
+                }
+                //break;
             }
-            cv::Scalar color = cv::Scalar(g_rng.uniform(0, 255), g_rng.uniform(0, 255), g_rng.uniform(0, 255));//所取的颜色任意值
-            rectangle(frame, cv::Point(faces[0].x, faces[0].y), cv::Point(faces[0].x + faces[0].width, faces[0].y + faces[0].height), color, 1, 8);//放入缓存
-            putText(frame, str, text_lb, cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255));//添加文字
+            //cv::Scalar color = cv::Scalar(g_rng.uniform(0, 255), g_rng.uniform(0, 255), g_rng.uniform(0, 255));//所取的颜色任意值
+            //rectangle(frame, cv::Point(faces[0].x, faces[0].y), cv::Point(faces[0].x + faces[0].width, faces[0].y + faces[0].height), color, 1, 8);//放入缓存
+            //putText(frame, str, text_lb, cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255));//添加文字
         }
         delete[] pImage_roi;
         emit imageToRecong(Mat2Image(frame));
         QThread::usleep(100);
-        //qDebug()<<"faceRecong 正在运行" <<"isStop == "<<isStop;
     }
 
 }

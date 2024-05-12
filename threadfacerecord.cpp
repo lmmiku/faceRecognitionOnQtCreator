@@ -55,7 +55,7 @@ void threadFaceRecord::faceRecord(QString name,QString gender,QString number,QSt
                 QThread::usleep(100);//等待100us
                 cv::destroyWindow(filename.toLocal8Bit().toStdString());//:销毁指定的窗口
                 pic_num++;//序号加1
-                if (pic_num == 11){
+                if (pic_num == 21){
                     int label = this->append_csv(name+"_"+number);
                     this->faceTrain();
                     DataBase::instance()->addToStuInfo(label,name,gender,number,age.toInt(),c);
@@ -93,14 +93,13 @@ void threadFaceRecord::faceTrain(){
         CV_Error(CV_StsError, error_message);
     }
 
-    for (unsigned int i = 0; i < images.size(); i++){
-        //cout<<images.size();
-        if (images[i].size() != cv::Size(92, 112)){
-            qDebug() << i;
-            //qDebug() << images[i].size();
-        }
-
-    }
+//    for (unsigned int i = 0; i < images.size(); i++){
+//        //cout<<images.size();
+//        if (images[i].size() != cv::Size(92, 112)){
+//            qDebug() << i;
+//            //qDebug() << images[i].size();
+//        }
+//    }
 
     // 下面的几行代码仅仅是从你的数据集中移除最后一张图片，作为测试图片
 //    cv::Mat testSample = images[images.size() - 1];

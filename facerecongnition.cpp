@@ -92,6 +92,11 @@ faceRecongnition::faceRecongnition(QString account,QWidget *parent): QWidget(par
         });
     });
 
+    //通知主界面重新加载人脸识别模型
+    connect(threadfacerecord,&threadFaceRecord::reload,[=](){
+        emit reload();
+    });
+
     //返回
     connect(ui->returnWidget,&QPushButton::clicked,this,[=](){
         this->threadfacerecord->stopFaceRecord();

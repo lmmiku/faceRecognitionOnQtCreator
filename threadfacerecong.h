@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QThread>
 #include <QMessageBox>
+#include <QPainter>
 #include <QDateTime>
 #include <QTimer>
 
@@ -23,17 +24,20 @@ public:
     void stopFaceRecong();
     int Predict(cv::Mat src_image);
     QImage Mat2Image(const cv::Mat mat);
+    int putString(cv::Mat &img, QString text, QPoint org, QFont font, QPen pen);
+    void reloadModel();        //重新加载模型
     ~threadFaceRecong();
 signals:
     void imageToView(QImage image);
     void imageToRecong(QImage image);
+    void PunchSuccess(QString stuName);
+    void PunchFailed(QString stuName);
+    void PunchNull();
 private:
     cv::Ptr<cv::face::FaceRecognizer> model;
     cv::CascadeClassifier cascade;
     bool isStop = false;
     cv::VideoCapture cap;
-
-    QMessageBox *message;
 };
 
 #endif // THREADFACERECONG_H

@@ -40,15 +40,18 @@ managementInfo::managementInfo(QString account,QWidget*parent):QWidget(parent),u
     connect(ui->deleteUser,&QPushButton::clicked,this,[=](){
         QList<QTableWidgetItem*> items = ui->infomation->selectedItems();
 
-        for(QTableWidgetItem *item:items){
-            int row = ui->infomation->row(item);
+        if(items.size() > 0){
+            int row = ui->infomation->row(items[0]);
             qDebug()<<row;
             if (row != -1){
+                QString name = ui->infomation->item(row,0)->text();
                 DeleteFileOrFolder(QString("video/"+ui->infomation->item(row,0)->text()+"_"+ui->infomation->item(row,2)->text()));
                 DataBase::instance()->deleteUserFromStuInfo(ui->infomation->item(row,2)->text());
                 ui->infomation->removeRow(row);
+                QMessageBox::information(nullptr,"删除用户","删除用户"+name+"成功!");
             }
         }
+        //this->initial();
     });
 
     //导出考勤情况表
@@ -122,6 +125,9 @@ void managementInfo::initial(){
     }
 
     //pieseries数据初始化
+    if(pie_series!= nullptr){
+        delete pie_series;
+    }
     pie_series = new QPieSeries(ui->pie_widget);
     ui->pie_widget->setRenderHint(QPainter::Antialiasing);
     ui->pie_widget->chart()->setTheme(QChart::ChartThemeQt);
@@ -220,7 +226,7 @@ void managementInfo::setUiStyle(){
     ui->infomation->setColumnWidth(2,175);
     ui->infomation->setColumnWidth(3,100);
     ui->infomation->setColumnWidth(4,125);
-    ui->infomation->setColumnWidth(5,125);
+    ui->infomation->horizontalHeader()->setStretchLastSection(true);  //最后一列自动充满
     ui->infomation->setSelectionBehavior(QAbstractItemView::SelectRows);  //选中模式：整行
     ui->infomation->verticalHeader()->setVisible(false);  //取消默认行数
 }

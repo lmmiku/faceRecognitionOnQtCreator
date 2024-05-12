@@ -38,6 +38,7 @@ public:
     ~threadFaceRecord();
 signals:
     void imageToRecord(QImage image);
+    void reload();
 private:
     cv::CascadeClassifier cascade;
     cv::VideoCapture cap;

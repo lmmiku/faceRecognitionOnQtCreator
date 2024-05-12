@@ -31,7 +31,7 @@ void threadFaceRecord::faceRecord(QString name,QString gender,QString number,QSt
             cap >> frame;
             if(frame.empty() || isStop){
                 qDebug()<<"faceRecord获取为空"<<"摄像头状态："<<cap.isOpened()<<"isStop = "<<isStop;
-                    return;
+                return;
             }
             std::vector<cv::Rect> faces;//vector容器存检测到的faces
             cv::Mat frame_gray;
@@ -45,7 +45,7 @@ void threadFaceRecord::faceRecord(QString name,QString gender,QString number,QSt
                 cv::rectangle(frame, faces[i], cv::Scalar(255, 0, 0), 2, 8, 0);
             }
             //当只有一个人脸时，开始拍照
-            if (faces.size() == 1 && HOG_SVM->predict(frame) == 1){
+            if (faces.size() == 1 /*&& HOG_SVM->predict(frame) == 1*/){
                 cv::Mat faceROI = frame_gray(faces[0]);//在灰度图中将圈出的脸所在区域裁剪出
                 cv::resize(faceROI, myFace, cv::Size(92, 112));//将兴趣域size为92*112
                 putText(frame, QString::number(pic_num).toStdString(), faces[0].tl(), 3, 1.2, (0, 0, 225), 2, 0);//在 faces[0].tl()的左上角上面写序号
@@ -103,23 +103,23 @@ void threadFaceRecord::faceTrain(){
     }
 
     // 下面的几行代码仅仅是从你的数据集中移除最后一张图片，作为测试图片
-    //[gm:自然这里需要根据自己的需要修改，他这里简化了很多问题]
-    cv::Mat testSample = images[images.size() - 1];
-    int testLabel = labels[labels.size() - 1];
-    images.pop_back();//删除最后一张照片，此照片作为测试图片
-    labels.pop_back();//删除最有一张照片的labels
+//    cv::Mat testSample = images[images.size() - 1];
+//    int testLabel = labels[labels.size() - 1];
+//    images.pop_back();//删除最后一张照片，此照片作为测试图片
+//    labels.pop_back();//删除最有一张照片的labels
 
     cv::Ptr<cv::face::LBPHFaceRecognizer> model = cv::face::LBPHFaceRecognizer::create();
     model->train(images, labels);
     model->save("MyFaceLBPHModel.xml");
+    emit reload();
 
     // 下面对测试图像进行预测，predictedLabel是预测标签结果
     //注意predict()入口参数必须为单通道灰度图像，如果图像类型不符，需要先进行转换
     //predict()函数返回一个整形变量作为识别标签
-    int predictedLabel2 = model->predict(testSample);
+//    int predictedLabel2 = model->predict(testSample);
 
-    QString result_message = QString("Predicted class = %1 / Actual class = %2.").arg(predictedLabel2).arg(testLabel);
-    qDebug() << result_message;
+//    QString result_message = QString("Predicted class = %1 / Actual class = %2.").arg(predictedLabel2).arg(testLabel);
+//    qDebug() << result_message;
 
     getchar();
     //waitKey(0);

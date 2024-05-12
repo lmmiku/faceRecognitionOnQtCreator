@@ -38,6 +38,43 @@ Widget::Widget(QWidget *parent)
         ui->viewFaceImage->setPixmap(QPixmap::fromImage(image));
     });
 
+    //打卡成功
+    connect(threadfacerecong,&threadFaceRecong::PunchSuccess,this,[=](QString name){
+        //                                QMessageBox::information(nullptr,"打卡成功",name+",打卡成功!\n时间："+\
+//                                        QDateTime::currentDateTime().toString("hh:mm:ss"));
+        if(!message->isVisible()){
+            message->information(nullptr,"打卡成功",name+",打卡成功!\n时间："+\
+                                        QDateTime::currentDateTime().toString("hh:mm:ss"));
+            message->show();
+        }
+        if(message == nullptr){
+            message = new QMessageBox();
+        }
+        QTimer::singleShot(800,[=](){
+            message->hide();
+            message->close();
+            delete message;
+            message = nullptr;
+        });
+    });
+    //打卡失败（迟到）
+    connect(threadfacerecong,&threadFaceRecong::PunchFailed,this,[=](QString name){
+        if(!message->isVisible()){
+            message->information(nullptr,"打卡成功","打卡成功,已迟到!\n时间："+\
+                                        QDateTime::currentDateTime().toString("hh:mm:ss"));
+            message->show();
+            disconnect(threadfacerecong,&threadFaceRecong::PunchSuccess,nullptr,nullptr);
+        }
+    });
+    //打卡失败，未注册
+    connect(threadfacerecong,&threadFaceRecong::PunchNull,this,[=](){
+        if(!message->isVisible()){
+            message->information(nullptr,"打卡失败","打卡失败,未注册用户!\n时间："+\
+                                        QDateTime::currentDateTime().toString("hh:mm:ss"));
+            message->show();
+            disconnect(threadfacerecong,&threadFaceRecong::PunchSuccess,nullptr,nullptr);
+        }
+    });
     //关闭按钮功能
     connect(ui->close,&QPushButton::clicked,this,[=](){
         this->widgetOut(this);
@@ -74,6 +111,12 @@ Widget::Widget(QWidget *parent)
                 connect(faceRecong,&faceRecongnition::returnWidget,this,[=](){
                     this->show();
                 });
+
+                //接收重新加载人脸识别模型信号
+                connect(faceRecong,&faceRecongnition::reload,this,[=](){
+                    threadfacerecong->reloadModel();
+                });
+
             }else{
                 adminLogin->hide();
                 QMessageBox::warning(this,"失败","账号或密码有误！");
@@ -108,6 +151,7 @@ void Widget::initial(){
     this->initialWidth = this->width();
     this->initialHeight = this->height();
     this->threadfacerecong = new threadFaceRecong();
+    message = new QMessageBox();
 //    this->net = cv::dnn::experimental_dnn_34_v14::readNetFromCaffe("C:/Users/shocker/QTpractise/face_recognition/Live/4_0_0_80x80_MiniFASNetV1SE.caffemodel",\
 //                                                                   "C:/Users/shocker/QTpractise/face_recognition/Live/deploy.prototxt");
 //    net.setPreferableBackend(cv::dnn::experimental_dnn_34_v14::DNN_BACKEND_OPENCV);

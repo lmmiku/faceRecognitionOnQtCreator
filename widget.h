@@ -101,6 +101,8 @@ private:
     //登录窗口
     AdminLogin *adminLogin = nullptr;
 
+    QMessageBox *message;
+
 };
 
 

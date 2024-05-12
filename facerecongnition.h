@@ -72,6 +72,7 @@ public:
 signals:
     void startFaceRecord(QString name,QString gender,QString stuNumber,QString age,QString c);
     void returnWidget();
+    void reload();
 
 private:
     Ui::faceRecongnition *ui;

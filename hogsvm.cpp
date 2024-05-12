@@ -13,7 +13,7 @@ int HOGSVM::predict(const cv::Mat& image){
     cv::Mat feature = this->Hog(img_gray);
 
     float respose = svm->predict(feature);
-    qDebug()<<respose;
+    //qDebug()<<respose;
     return respose;
 }
 

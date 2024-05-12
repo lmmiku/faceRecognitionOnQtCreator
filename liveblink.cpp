@@ -1,7 +1,7 @@
 #include "liveblink.h"
 
-LiveBlink::LiveBlink()
-{
+LiveBlink::LiveBlink(){
+
 }
 
 void LiveBlink::bioassay(){
@@ -169,11 +169,11 @@ void LiveBlink::bioassay(){
         }
         if(reyeIndex || leyeIndex || mouthIndex){
             cap.release();
-            //emit isLiving(true);
-            //return ;
+            emit isLiving(true);
+            return ;
         }
-        cv::imshow("frame",frame);
-        cv::waitKey(50);
+//        cv::imshow("frame",frame);
+//        cv::waitKey(50);
     }
     //cv::destroyAllWindows();
 }

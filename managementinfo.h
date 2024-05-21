@@ -43,13 +43,16 @@ public:
     void setUiStyle();
     //导出数据为excel表格
     void deriveTab();
+    //刷新图标
+    void fflushView();
 signals:
     void returnWidget();
+    void reTrain();
 private:
     Ui::managementInfo *ui;
 
     //饼状图
-    QPieSeries *pie_series;
+    QPieSeries *pie_series = nullptr;
 
     //用于最大化的变量
     QSize initSize = this->size();

@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QThread>
+#include <QTimer>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -38,6 +39,7 @@ public:
     ~threadFaceRecord();
 signals:
     void imageToRecord(QImage image);
+    void end();
     void reload();
 private:
     cv::CascadeClassifier cascade;

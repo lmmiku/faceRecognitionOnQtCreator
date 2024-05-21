@@ -52,12 +52,19 @@ managementInfo::managementInfo(QString account,QWidget*parent):QWidget(parent),u
             }
         }
         //this->initial();
+        emit reTrain();
     });
 
     //导出考勤情况表
     connect(ui->derive,&QPushButton::clicked,this,[=](){
         this->deriveTab();
     });
+
+    //刷新考勤表
+    connect(ui->fflush,&QPushButton::clicked,this,[=](){
+        this->fflushView();
+    });
+    emit ui->fflush->clicked();
 }
 
 void managementInfo::deriveTab(){
@@ -95,11 +102,20 @@ void managementInfo::deriveTab(){
 void managementInfo::initial(){
     this->initialWidth = this->width();
     this->initialHeight = this->height();
+    ui->date->setDate(QDate::currentDate());
+}
+
+void managementInfo::fflushView(){
     int state1 = 0;int state2 = 0;int state3 = 0;
     //tabwidget数据初始化
     QVector<QString> idInfo = DataBase::instance()->getInfoFromAdminInfo(account);
+    qDebug()<<ui->date->date().toString("yyyy.MM.dd");
     for(QString stuNumber:idInfo){
         std::tuple<int,QString,QString,QString,int,QString> info = DataBase::instance()->getInfoFromId(stuNumber);
+        std::tuple<QString,QString> t = DataBase::instance()->getAttendanceInfo(ui->date->date(),std::get<3>(info));
+        if(t == std::tuple<QString,QString>{}){
+            continue;
+        }
         int rowCount = ui->infomation->rowCount();
         ui->infomation->insertRow(rowCount);
         ui->infomation->setItem(rowCount,0,new QTableWidgetItem(std::get<1>(info)));
@@ -107,11 +123,13 @@ void managementInfo::initial(){
         ui->infomation->setItem(rowCount,2,new QTableWidgetItem(std::get<3>(info)));
         ui->infomation->setItem(rowCount,3,new QTableWidgetItem(QString::number(std::get<4>(info))));
         ui->infomation->setItem(rowCount,4,new QTableWidgetItem(std::get<5>(info)));
-        QString state = DataBase::instance()->getStateFromId(std::get<3>(info));
-        ui->infomation->setItem(rowCount,5,new QTableWidgetItem(state));
+
+        ui->infomation->setItem(rowCount,5,new QTableWidgetItem(std::get<0>(t)));
+        ui->infomation->setItem(rowCount,6,new QTableWidgetItem(std::get<1>(t)));
+        QString state = std::get<0>(t);
         if("已打卡" == state){
             state1++;
-        }else if("迟到" == state){
+        }else if("已迟到" == state){
             state2++;
         }else{
             state3++;
@@ -122,11 +140,13 @@ void managementInfo::initial(){
         ui->infomation->item(rowCount,3)->setTextAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
         ui->infomation->item(rowCount,4)->setTextAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
         ui->infomation->item(rowCount,5)->setTextAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
+        ui->infomation->item(rowCount,6)->setTextAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
     }
 
     //pieseries数据初始化
     if(pie_series!= nullptr){
         delete pie_series;
+        pie_series = nullptr;
     }
     pie_series = new QPieSeries(ui->pie_widget);
     ui->pie_widget->setRenderHint(QPainter::Antialiasing);
@@ -164,26 +184,26 @@ bool managementInfo::DeleteFileOrFolder(const QString &strPath)//要删除的文
 }
 
 void managementInfo::showEvent(QShowEvent* event){
-    QPropertyAnimation *animation= new QPropertyAnimation(this,"geometry");
-    //QScreen* screen = QGuiApplication::primaryScreen();
-    animation->setDuration(320);
-    //animation->setStartValue(QRect(this->x()+screen->geometry().width()/3, this->y()+screen->geometry().height()/4, this->width(),0));
-    //animation->setEndValue(QRect(this->x()+screen->geometry().width()/3, this->y()+screen->geometry().height()/4, this->width(),this->height()));
-    animation->setStartValue(QRect(this->x(), this->y(), this->initialWidth,0));
-    animation->setEndValue(QRect(this->x() ,this->y(), this->initialWidth,this->initialHeight));
-    animation->setEasingCurve(QEasingCurve::Linear);
-    animation->start(QAbstractAnimation::DeleteWhenStopped);
+//    QPropertyAnimation *animation= new QPropertyAnimation(this,"geometry");
+//    //QScreen* screen = QGuiApplication::primaryScreen();
+//    animation->setDuration(320);
+//    //animation->setStartValue(QRect(this->x()+screen->geometry().width()/3, this->y()+screen->geometry().height()/4, this->width(),0));
+//    //animation->setEndValue(QRect(this->x()+screen->geometry().width()/3, this->y()+screen->geometry().height()/4, this->width(),this->height()));
+//    animation->setStartValue(QRect(this->x(), this->y(), this->initialWidth,0));
+//    animation->setEndValue(QRect(this->x() ,this->y(), this->initialWidth,this->initialHeight));
+//    animation->setEasingCurve(QEasingCurve::Linear);
+//    animation->start(QAbstractAnimation::DeleteWhenStopped);
 
     QWidget::showEvent(event);
 }
 
 void managementInfo::widgetOut(QWidget *target){
-    QPropertyAnimation * animation = new QPropertyAnimation(target , "geometry");
-    animation->setDuration(320);
-    animation->setStartValue(QRect(target->x(),target->y(),target->width(),target->height()));
-    animation->setEndValue(QRect(target->x(),target->y(),target->width(),0));
-    animation->setEasingCurve(QEasingCurve::Linear);
-    animation->start(QAbstractAnimation::DeleteWhenStopped);
+//    QPropertyAnimation * animation = new QPropertyAnimation(target , "geometry");
+//    animation->setDuration(320);
+//    animation->setStartValue(QRect(target->x(),target->y(),target->width(),target->height()));
+//    animation->setEndValue(QRect(target->x(),target->y(),target->width(),0));
+//    animation->setEasingCurve(QEasingCurve::Linear);
+//    animation->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 void managementInfo::setUiStyle(){
@@ -221,11 +241,12 @@ void managementInfo::setUiStyle(){
     //设置tabwidget样式
     ui->infomation->horizontalHeader()->setDefaultAlignment(Qt::AlignHCenter);//表头字体居中
     ui->infomation->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->infomation->setColumnWidth(0,130);
-    ui->infomation->setColumnWidth(1,125);
-    ui->infomation->setColumnWidth(2,175);
+    ui->infomation->setColumnWidth(0,100);
+    ui->infomation->setColumnWidth(1,80);
+    ui->infomation->setColumnWidth(2,150);
     ui->infomation->setColumnWidth(3,100);
     ui->infomation->setColumnWidth(4,125);
+    ui->infomation->setColumnWidth(5,125);
     ui->infomation->horizontalHeader()->setStretchLastSection(true);  //最后一列自动充满
     ui->infomation->setSelectionBehavior(QAbstractItemView::SelectRows);  //选中模式：整行
     ui->infomation->verticalHeader()->setVisible(false);  //取消默认行数

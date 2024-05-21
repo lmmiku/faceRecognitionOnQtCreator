@@ -24,6 +24,7 @@
 namespace Ui {
 class faceRecongnition;
 class InformationEntry;
+class setTime;
 }
 
 class InformationEntry:public QWidget{
@@ -39,47 +40,54 @@ private:
     Ui::InformationEntry *uiInf;
 };
 
+class setTime:public QWidget{
+    Q_OBJECT
+public:
+    explicit setTime(QString account,QWidget *parent=nullptr);
+    Ui::setTime* getUi();
+    ~setTime();
+signals:
+    void entrySuccess();
+private:
+    Ui::setTime *uiSet;
+};
+
 class faceRecongnition : public QWidget
 {
     Q_OBJECT
 
 public:
     faceRecongnition(QString account,QWidget *parent = nullptr);
+
     //将cv::Mat转化为QImage
     QImage Mat2Image(const cv::Mat mimage);
-    //cv::Mat norm_0_255(InputArray _src);
-
     //窗口拖动
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent* event);
-
-
     //重写界面出现事件
     void showEvent(QShowEvent *event);
     //界面关闭
     void widgetOut(QWidget *target);
-
     //ui样式
     void setUiStyle();
-
     void initial();
-
     bool eventFilter(QObject *watched, QEvent *event);
-
+    bool DeleteFileOrFolder(const QString &strPath);
     ~faceRecongnition();
 
 signals:
     void startFaceRecord(QString name,QString gender,QString stuNumber,QString age,QString c);
     void returnWidget();
     void reload();
-
+    void reSetTime(QString account);
 private:
     Ui::faceRecongnition *ui;
     QThread thread_faceRecord;
     threadFaceRecord *threadfacerecord = nullptr;
     InformationEntry *informationEntry = nullptr;
     managementInfo *manage = nullptr;
+    setTime *settime = nullptr;
     //用于最大化的变量
     QSize initSize = this->size();
     QDesktopWidget *desktop = QApplication::desktop();

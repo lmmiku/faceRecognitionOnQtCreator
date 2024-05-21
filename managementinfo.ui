@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>930</width>
+    <height>695</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+   <item row="0" column="1">
     <widget class="QWidget" name="widget" native="true">
      <property name="minimumSize">
       <size>
@@ -25,10 +25,10 @@
      <widget class="QTableWidget" name="infomation">
       <property name="geometry">
        <rect>
-        <x>0</x>
+        <x>5</x>
         <y>287</y>
-        <width>781</width>
-        <height>294</height>
+        <width>901</width>
+        <height>385</height>
        </rect>
       </property>
       <column>
@@ -61,13 +61,18 @@
         <string>考勤状态</string>
        </property>
       </column>
+      <column>
+       <property name="text">
+        <string>打卡时间</string>
+       </property>
+      </column>
      </widget>
      <widget class="QWidget" name="widget_title" native="true">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>782</width>
+        <width>911</width>
         <height>36</height>
        </rect>
       </property>
@@ -200,7 +205,7 @@
      <widget class="QPushButton" name="returnWidget">
       <property name="geometry">
        <rect>
-        <x>700</x>
+        <x>820</x>
         <y>260</y>
         <width>75</width>
         <height>23</height>
@@ -223,7 +228,7 @@
      <widget class="QPushButton" name="deleteUser">
       <property name="geometry">
        <rect>
-        <x>700</x>
+        <x>820</x>
         <y>50</y>
         <width>75</width>
         <height>23</height>
@@ -236,7 +241,7 @@
      <widget class="QPushButton" name="derive">
       <property name="geometry">
        <rect>
-        <x>700</x>
+        <x>820</x>
         <y>80</y>
         <width>75</width>
         <height>23</height>
@@ -244,6 +249,29 @@
       </property>
       <property name="text">
        <string>导出考勤表</string>
+      </property>
+     </widget>
+     <widget class="QDateEdit" name="date">
+      <property name="geometry">
+       <rect>
+        <x>780</x>
+        <y>110</y>
+        <width>110</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="fflush">
+      <property name="geometry">
+       <rect>
+        <x>780</x>
+        <y>140</y>
+        <width>111</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>刷新考勤信息</string>
       </property>
      </widget>
     </widget>

@@ -32,6 +32,7 @@ Widget::Widget(QWidget *parent)
 
     //人脸识别线程
     this->threadfacerecong->moveToThread(&thread_faceRecong);
+    threadfacerecong->setTime("1");
     thread_faceRecong.start();
     connect(this,&Widget::startFaceRecong,threadfacerecong,&threadFaceRecong::faceIdentification);
     connect(threadfacerecong,&threadFaceRecong::imageToRecong,this,[=](QImage image){
@@ -98,7 +99,10 @@ Widget::Widget(QWidget *parent)
                 connect(faceRecong,&faceRecongnition::returnWidget,this,[=](){
                     this->show();
                 });
-
+                //设置考勤时间信号
+                connect(faceRecong,&faceRecongnition::reSetTime,this,[=](QString account){
+                    threadfacerecong->setTime(account);
+                });
                 //接收重新加载人脸识别模型信号
                 connect(faceRecong,&faceRecongnition::reload,this,[=](){
                     threadfacerecong->reloadModel();
@@ -149,6 +153,7 @@ void Widget::punchSuccess(QString stuNumber){
         connect(threadfacerecong,&threadFaceRecong::PunchFailed,this,&Widget::punchFailed);
         connect(threadfacerecong,&threadFaceRecong::PunchNull,this,&Widget::punchNull);
     });
+    ui->state->setText("打卡成功");
 }
 
 void Widget::punchFailed(QString stuNumber){
@@ -170,6 +175,7 @@ void Widget::punchFailed(QString stuNumber){
         connect(threadfacerecong,&threadFaceRecong::PunchNull,this,&Widget::punchNull);
         //emit startFaceRecong();
     });
+    ui->state->setText("打卡成功");
 }
 
 void Widget::punchNull(){
@@ -190,6 +196,7 @@ void Widget::punchNull(){
         connect(threadfacerecong,&threadFaceRecong::PunchNull,this,&Widget::punchNull);
         //emit startFaceRecong();
     });
+    ui->state->setText("打卡失败");
 }
 
 void Widget::initial(){

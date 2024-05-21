@@ -58,6 +58,7 @@ int DataBase::getLastIdFromStuInfo(){
 }
 
 QString DataBase::getInfoFromStuInfo(int id){
+    qDebug()<<id;
     QString select = QString("SELECT stuName FROM stuInfo WHERE id = %1").arg(id);
     if(!query.exec(select)){
         qDebug() << "Error:getInfoFromStuInfo->Fail to select data. " << query.lastError();
@@ -98,11 +99,11 @@ std::tuple<int,QString,QString,QString,int,QString> DataBase::getInfoFromId(QStr
     QString select = QString("SELECT * FROM stuInfo WHERE stuNumber = '%1'").arg(stuNumber);
     if(!query.exec(select)){
         qDebug()<<"Error:getInfoFromId->Fail to select data. " << query.lastError();
-    }else{
-        if(query.next()){
-            info = std::make_tuple(query.value(0).toInt(),query.value(1).toString(),query.value(2).toString()\
-                                   ,query.value(3).toString(),query.value(4).toInt(),query.value(5).toString());
-        }
+        return info;
+    }
+    if(query.next()){
+        info = std::make_tuple(query.value("id").toInt(),query.value("stuName").toString(),query.value("stuGender").toString()\
+                               ,query.value("stuNumber").toString(),query.value("stuAge").toInt(),query.value("class").toString());
     }
     return info;
 }
@@ -172,14 +173,18 @@ int DataBase::getId_stuNumber(QString stuNumber){
 }
 
 bool DataBase::insertToAttendanceInfo(QString stuNumber,QString state,QString time){
+    QDateTime dateTime = QDateTime::currentDateTime();
     QString string;
-    if(getExist(stuNumber)){
-        string = QString("UPDATE attendanceInfo SET state = '%1' WHERE stuNumber = '%2'").arg(state).arg(stuNumber);
-    }else{
-        string = QString("INSERT INTO attendanceInfo (stuId,stuNumber,state,time) VALUES(%1,'%2','%3','%4')").arg(getId_stuNumber(stuNumber)).arg(stuNumber).arg(state).arg(time);
-    }
+//    if(getExist(stuNumber)){
+//        string = QString("UPDATE attendanceInfo SET state = '%1' WHERE stuNumber = '%2'").arg(state).arg(stuNumber);
+//    }else{
+//        string = QString("INSERT INTO attendanceInfo (stuId,stuNumber,state,time) VALUES(%1,'%2','%3','%4')").arg(getId_stuNumber(stuNumber)).arg(stuNumber).arg(state).arg(time);
+//    }
+    string = QString("INSERT INTO attendanceInfo (stuId,stuNumber,state,time,DATE_,year,mouth,date) VALUES(%1,'%2','%3','%4','%5',%6,%7,%8)")
+                 .arg(getId_stuNumber(stuNumber)).arg(stuNumber).arg(state).arg(time).arg(dateTime.toString("yyyy.MM.dd")).arg(dateTime.date().year()).
+             arg(dateTime.date().month()).arg(dateTime.date().day());
     if(!query.exec(string)){
-        qDebug()<<"Error:deleteUserFromStuinfo->Fail to delete data. " << query.lastError();
+        qDebug()<<"Error:insertToAttendanceInfo->Fail to insert data. " << query.lastError();
     }else{
         return true;
     }
@@ -199,7 +204,7 @@ QString DataBase::getStuNumber(int id){
 }
 
 QString DataBase::getName(QString stuNumber){
-    QString select = QString("SELECT stuName FROM stuInfo WHERE stuNumber = %1").arg(stuNumber);
+    QString select = QString("SELECT stuName FROM stuInfo WHERE stuNumber = '%1'").arg(stuNumber);
     if(!query.exec(select)){
         qDebug() << "Error:getInfoFromStuInfo->Fail to select data. " << query.lastError();
     }else{
@@ -226,6 +231,51 @@ bool DataBase::getExist(QString stuNumber){
         return true;
     }
     return false;
+}
+
+std::tuple<QString,QString> DataBase::getAttendanceInfo(QDate date,QString stuNumber){
+    QString Data = date.toString("yyyy.MM.dd");
+    //QString select = QString("SELECT state,time FROM attendanceInfo WHERE stuNumber = '%1' AND year = %2 AND mouth = %3 AND date = %4").arg(stuNumber).arg(year).arg(mouth).arg(day);
+    QString select = QString("SELECT state,time FROM attendanceInfo WHERE stuNumber = '%1' AND DATE_ = '%2'").arg(stuNumber).arg(Data);
+    qDebug()<<select;
+    if(!query.exec(select)){
+        qDebug() << "Error:getAttendanceInfo->Fail to select data. " << query.lastError();
+    }
+    if(query.next()){
+        return std::make_tuple(query.value(0).toString(),query.value(1).toString());
+    }
+    return std::tuple<QString,QString>{};
+}
+
+QVector<std::tuple<QString,QString>> DataBase::getclassScheduleInfo(QString account){
+    QVector<std::tuple<QString,QString>> data;
+    QString select = QString("SELECT startSignTime,endSignTime FROM classSchedule WHERE account = '%1'").arg(account);
+    qDebug()<<select;
+    if(!query.exec(select)){
+        qDebug() << "Error:getclassScheduleInfo->Fail to select data. " << query.lastError();
+        return data;
+    }
+    while(query.next()){
+        std::tuple<QString,QString> t = std::make_tuple(query.value(0).toString(),query.value(1).toString());
+        data.append(t);
+    }
+    return data;
+}
+
+bool DataBase::insertclassScheduleInfo(QString account,QVector<std::tuple<QString,QString>> data){
+    QString delete_ = QString("DELETE FROM classSchedule WHERE account = '%1'").arg(account);
+    if(!query.exec(delete_)){
+        qDebug() << "Error:getclassScheduleInfo->Fail to select data. " << query.lastError();
+        return false;
+    }
+    for(std::tuple<QString,QString> t:data){
+        QString insert = QString("INSERT INTO classSchedule (account,startSignTime,endSignTime) VALUES('%1','%2','%3')").arg(account).arg(std::get<0>(t)).arg(std::get<1>(t));
+        if(!query.exec(insert)){
+            qDebug() << "Error:insertclassScheduleInfo->Fail to insert data. " << query.lastError();
+            return false;
+        }
+    }
+    return true;
 }
 
 DataBase::~DataBase(){

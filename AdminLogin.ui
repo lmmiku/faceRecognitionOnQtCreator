@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>263</width>
+    <height>160</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>管理员登录</string>
   </property>
   <widget class="QLineEdit" name="account">
    <property name="geometry">
@@ -62,8 +62,8 @@
   <widget class="QPushButton" name="login">
    <property name="geometry">
     <rect>
-     <x>240</x>
-     <y>230</y>
+     <x>170</x>
+     <y>120</y>
      <width>75</width>
      <height>23</height>
     </rect>

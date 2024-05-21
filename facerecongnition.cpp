@@ -1,7 +1,7 @@
 #include "facerecongnition.h"
 #include "ui_facerecongnition.h"
 #include "ui_InformationEntry.h"
-
+#include "ui_setTime.h"
 InformationEntry::InformationEntry(QWidget*parent):QWidget(parent),uiInf(new Ui::InformationEntry){
     uiInf->setupUi(this);
     connect(uiInf->entering,&QPushButton::clicked,this,[=](){
@@ -17,6 +17,58 @@ InformationEntry::~InformationEntry(){
     delete uiInf;
 }
 
+setTime::setTime(QString account,QWidget*parent):QWidget(parent),uiSet(new Ui::setTime){
+    uiSet->setupUi(this);
+    uiSet->info->horizontalHeader()->setDefaultAlignment(Qt::AlignHCenter);
+    uiSet->info->setColumnWidth(0,60);
+    uiSet->info->setColumnWidth(1,150);
+    //uiSet->info->setColumnWidth(2,60);
+    uiSet->info->horizontalHeader()->setStretchLastSection(true);
+
+    QVector<std::tuple<QString,QString>> info = DataBase::instance()->getclassScheduleInfo(account);
+    for(std::tuple<QString,QString> t:info){
+        int rowCount = uiSet->info->rowCount();
+        uiSet->info->insertRow(rowCount);
+        uiSet->info->setItem(rowCount,0,new QTableWidgetItem(account));
+        uiSet->info->setItem(rowCount,1,new QTableWidgetItem(std::get<0>(t)));
+        uiSet->info->setItem(rowCount,2,new QTableWidgetItem(std::get<1>(t)));
+    }
+
+    connect(uiSet->add,&QPushButton::clicked,this,[=](){
+        int rowCount = uiSet->info->rowCount();
+        uiSet->info->insertRow(rowCount);
+        uiSet->info->setItem(rowCount,0,new QTableWidgetItem(account));
+    });
+    connect(uiSet->remove,&QPushButton::clicked,this,[=](){
+        QList<QTableWidgetItem*> items = uiSet->info->selectedItems();
+        if(items.size() > 0){
+            int row = uiSet->info->row(items[0]);
+            uiSet->info->removeRow(row);
+        }
+    });
+    connect(uiSet->ok,&QPushButton::clicked,this,[=](){
+        QVector<std::tuple<QString,QString>> data;
+        for(int i=0;i<uiSet->info->rowCount();i++){
+            std::tuple<QString,QString> t;
+            if(uiSet->info->item(i,0)!=NULL && uiSet->info->item(i,1)!=NULL && uiSet->info->item(i,2)!=NULL &&\
+                uiSet->info->item(i,0)->text()!="" && uiSet->info->item(i,1)->text()!="" && uiSet->info->item(i,2)->text()!=""){
+                t = std::make_tuple(uiSet->info->item(i,1)->text(),uiSet->info->item(i,2)->text());
+            }
+            data.append(t);
+        }
+        DataBase::instance()->insertclassScheduleInfo(account,data);
+        emit entrySuccess();
+    });
+}
+
+Ui::setTime* setTime::getUi(){
+    return uiSet;
+}
+
+setTime::~setTime(){
+    delete uiSet;
+}
+
 faceRecongnition::faceRecongnition(QString account,QWidget *parent): QWidget(parent), ui(new Ui::faceRecongnition){
     ui->setupUi(this);
 
@@ -29,7 +81,6 @@ faceRecongnition::faceRecongnition(QString account,QWidget *parent): QWidget(par
 
     //关闭按钮功能
     connect(ui->close,&QPushButton::clicked,this,[=](){
-
         widgetOut(this);
         QTimer::singleShot(325,this,[=](){
             this->close();
@@ -80,7 +131,6 @@ faceRecongnition::faceRecongnition(QString account,QWidget *parent): QWidget(par
             this->hide();
             manage->show();
         });
-
     });
 
     //关闭摄像头
@@ -92,8 +142,13 @@ faceRecongnition::faceRecongnition(QString account,QWidget *parent): QWidget(par
         });
     });
 
+    //录入完成，关闭摄像头
+    connect(threadfacerecord,&threadFaceRecord::end,this,[=](){
+        emit ui->closeCap->clicked();
+    });
+
     //通知主界面重新加载人脸识别模型
-    connect(threadfacerecord,&threadFaceRecord::reload,[=](){
+    connect(threadfacerecord,&threadFaceRecord::reload,this,[=](){
         emit reload();
     });
 
@@ -105,6 +160,28 @@ faceRecongnition::faceRecongnition(QString account,QWidget *parent): QWidget(par
             this->hide();
             emit returnWidget();
         });
+    });
+    //设置考勤时间
+    connect(ui->setTime,&QPushButton::clicked,this,[=](){
+        if(settime == nullptr){
+            settime = new setTime(account);
+        }
+        settime->show();
+        connect(settime,&setTime::entrySuccess,this,[=](){
+            emit reSetTime(account);
+            delete settime;
+            settime = nullptr;
+        });
+    });
+    //删除用户
+    connect(ui->remove,&QPushButton::clicked,this,[=](){
+        bool ok = false;
+        QString stuNumber = QInputDialog::getText(this,"删除用户","输入学号",QLineEdit::Normal,"",&ok);
+        if(ok && !stuNumber.isEmpty()){
+            QMessageBox::information(nullptr,"删除用户","删除用户"+DataBase::instance()->getName(stuNumber)+"成功!");
+            DataBase::instance()->deleteUserFromStuInfo(stuNumber);
+            qDebug()<<DeleteFileOrFolder(QString("video/"+DataBase::instance()->getName(stuNumber)+"_"+stuNumber));
+        }
     });
 }
 
@@ -226,6 +303,22 @@ bool faceRecongnition::eventFilter(QObject *watched, QEvent *event){
         }
     }
     return QWidget::eventFilter(watched,event);
+}
+
+bool faceRecongnition::DeleteFileOrFolder(const QString &strPath)//要删除的文件夹或文件的路径
+{
+    if (strPath.isEmpty() || !QDir().exists(strPath))//是否传入了空的路径||路径是否存在
+        return false;
+
+    QFileInfo FileInfo(strPath);
+
+    if (FileInfo.isFile())
+        QFile::remove(strPath);
+    else if (FileInfo.isDir()){
+        QDir qDir(strPath);
+        qDir.removeRecursively();
+    }
+    return true;
 }
 
 faceRecongnition::~faceRecongnition()

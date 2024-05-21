@@ -46,6 +46,12 @@ public:
     QDateTime getTime_stuNumber(QString stuNumber);
     //通过学号查找姓名
     QString getName(QString stuNumber);
+    //根据年月日查找对应天数考勤情况
+    std::tuple<QString,QString> getAttendanceInfo(QDate date,QString stuNumber);
+    //通过account查找课表信息
+    QVector<std::tuple<QString,QString>> getclassScheduleInfo(QString account);
+    //插入account课表信息
+    bool insertclassScheduleInfo(QString account,QVector<std::tuple<QString,QString>> data);
 
 private:
     DataBase();

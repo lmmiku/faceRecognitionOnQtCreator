@@ -8,7 +8,11 @@ threadFaceRecord::threadFaceRecord(){
         dir.mkpath(videoPath);
     }
     connect(live,&LiveBlink::isLiving,this,[=](bool flag){
+        live->stopLiveBlink();
         this->isLiving = true;
+    });
+    connect(live,&LiveBlink::imageToView,this,[=](QImage image){
+        emit imageToRecord(image);
     });
 }
 
@@ -33,12 +37,13 @@ void threadFaceRecord::faceRecord(QString name,QString gender,QString number,QSt
                 qDebug()<<"faceRecord获取为空"<<"摄像头状态："<<cap.isOpened()<<"isStop = "<<isStop;
                 return;
             }
+//            try{
             std::vector<cv::Rect> faces;//vector容器存检测到的faces
             cv::Mat frame_gray;
             cvtColor(frame, frame_gray, cv::COLOR_BGR2GRAY);//转灰度化，减少运算
             cascade.detectMultiScale(frame_gray, faces, 1.1, 4, CV_HAAR_DO_ROUGH_SEARCH, cv::Size(70, 70), cv::Size(1000, 1000));
 
-            //qDebug()<<QString("检测到人脸个数：%1").arg(faces.size());
+            qDebug()<<QString("检测到人脸个数：%1").arg(faces.size());
             //识别到的脸用矩形圈出
             for (unsigned int i = 0; i < faces.size(); i++)
             {
@@ -57,14 +62,20 @@ void threadFaceRecord::faceRecord(QString name,QString gender,QString number,QSt
                 pic_num++;//序号加1
                 if (pic_num == 21){
                     int label = this->append_csv(name+"_"+number);
+                    qDebug()<<"训练前";
                     this->faceTrain();
                     DataBase::instance()->addToStuInfo(label,name,gender,number,age.toInt(),c);
+                    qDebug()<<"训练后";
+                    emit end();
                     return;//当序号为11时退出循环,一共拍10张照片
                 }
             }
             emit imageToRecord(Mat2Image(frame));
             QThread::usleep(100);//等待100us
 //            //qDebug()<<"faceRecord 正在运行" <<"isStop == "<<isStop;
+//            }catch(cv::Exception& e){
+
+//            }
         }
 
     }
@@ -87,38 +98,18 @@ void threadFaceRecord::faceTrain(){
         qDebug() << "Error opening file \"" << QString::fromStdString(fn_csv) << "\". Reason: " << e.msg.c_str();
         return;
     }
+    qDebug()<<"读取数据后";
     // 如果没有读取到足够图片，也退出.
     if (images.size() <= 1) {
         std::string error_message = "This demo needs at least 2 images to work. Please add more images to your data set!";
         CV_Error(CV_StsError, error_message);
     }
-
-//    for (unsigned int i = 0; i < images.size(); i++){
-//        //cout<<images.size();
-//        if (images[i].size() != cv::Size(92, 112)){
-//            qDebug() << i;
-//            //qDebug() << images[i].size();
-//        }
-//    }
-
-    // 下面的几行代码仅仅是从你的数据集中移除最后一张图片，作为测试图片
-//    cv::Mat testSample = images[images.size() - 1];
-//    int testLabel = labels[labels.size() - 1];
-//    images.pop_back();//删除最后一张照片，此照片作为测试图片
-//    labels.pop_back();//删除最有一张照片的labels
-
+    qDebug()<<"训练模型前";
     cv::Ptr<cv::face::LBPHFaceRecognizer> model = cv::face::LBPHFaceRecognizer::create();
     model->train(images, labels);
     model->save("MyFaceLBPHModel.xml");
+    qDebug()<<"训练模型后";
     emit reload();
-
-    // 下面对测试图像进行预测，predictedLabel是预测标签结果
-    //注意predict()入口参数必须为单通道灰度图像，如果图像类型不符，需要先进行转换
-    //predict()函数返回一个整形变量作为识别标签
-//    int predictedLabel2 = model->predict(testSample);
-
-//    QString result_message = QString("Predicted class = %1 / Actual class = %2.").arg(predictedLabel2).arg(testLabel);
-//    qDebug() << result_message;
 
     getchar();
     //waitKey(0);
@@ -166,7 +157,7 @@ int threadFaceRecord::append_csv(QString dirName){
         return 0;
     }
     QTextStream fh(&outFile);
-    //查询最大的id，没有查到返回0
+    //查询最大的id，没有查到返回1
     int label = DataBase::instance()->getLastIdFromStuInfo()+1;
     QDir subjectDir(BASE_PATH+dirName);
     subjectDir.setFilter(QDir::Files | QDir::NoDotAndDotDot);

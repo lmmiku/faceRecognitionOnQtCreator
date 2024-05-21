@@ -72,6 +72,7 @@ FORMS += \
     InformationEntry.ui \
     facerecongnition.ui \
     managementinfo.ui \
+    setTime.ui \
     widget.ui
 
 # Default rules for deployment.

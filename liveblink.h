@@ -11,6 +11,7 @@
 #include <opencv2/opencv.hpp>
 #include <QDateTime>
 #include <QDebug>
+#include <QImage>
 #include "fonts.h"
 #include "gui_core_kernel_1.h"
 
@@ -22,8 +23,12 @@ public:
     LiveBlink();
     void bioassay();
     void stopLiveBlink();
+    void startLiveBlink();
+    QImage Mat2Image(const cv::Mat mat);
 signals:
     void isLiving(bool flag);
+    void imageToView(QImage image);
+    void faceImage(cv::Mat frame);
 private:
     bool isStop = false;
 };

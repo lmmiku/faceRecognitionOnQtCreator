@@ -229,7 +229,7 @@
            </font>
           </property>
           <property name="text">
-           <string>日期</string>
+           <string/>
           </property>
          </widget>
          <widget class="QLabel" name="time">
@@ -247,7 +247,25 @@
            </font>
           </property>
           <property name="text">
-           <string>时间</string>
+           <string/>
+          </property>
+         </widget>
+         <widget class="QLabel" name="state">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>410</y>
+            <width>101</width>
+            <height>51</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>显示打卡状态</string>
           </property>
          </widget>
         </widget>

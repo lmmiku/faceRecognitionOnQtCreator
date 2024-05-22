@@ -52,6 +52,10 @@ public:
     QVector<std::tuple<QString,QString>> getclassScheduleInfo(QString account);
     //插入account课表信息
     bool insertclassScheduleInfo(QString account,QVector<std::tuple<QString,QString>> data);
+    //通过学号更新id
+    bool updateId_stuNumber(QString stuNumber,int id);
+    //通过学号修改考勤状态
+    bool updateState_stuNumbe(QString stuNumber);
 
 private:
     DataBase();

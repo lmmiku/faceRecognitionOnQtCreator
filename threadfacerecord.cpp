@@ -61,17 +61,16 @@ void threadFaceRecord::faceRecord(QString name,QString gender,QString number,QSt
                 cv::destroyWindow(filename.toLocal8Bit().toStdString());//:销毁指定的窗口
                 pic_num++;//序号加1
                 if (pic_num == 21){
-                    int label = this->append_csv(name+"_"+number);
-                    qDebug()<<"训练前";
+//                    int label = this->append_csv(name+"_"+number);
+                    DataBase::instance()->addToStuInfo(-1,name,gender,number,age.toInt(),c);
+                    this->create_csv();
                     this->faceTrain();
-                    DataBase::instance()->addToStuInfo(label,name,gender,number,age.toInt(),c);
-                    qDebug()<<"训练后";
                     emit end();
                     return;//当序号为11时退出循环,一共拍10张照片
                 }
             }
             emit imageToRecord(Mat2Image(frame));
-            QThread::usleep(100);//等待100us
+            QThread::usleep(300);//等待100us
 //            //qDebug()<<"faceRecord 正在运行" <<"isStop == "<<isStop;
 //            }catch(cv::Exception& e){
 
@@ -98,17 +97,19 @@ void threadFaceRecord::faceTrain(){
         qDebug() << "Error opening file \"" << QString::fromStdString(fn_csv) << "\". Reason: " << e.msg.c_str();
         return;
     }
-    qDebug()<<"读取数据后";
     // 如果没有读取到足够图片，也退出.
     if (images.size() <= 1) {
         std::string error_message = "This demo needs at least 2 images to work. Please add more images to your data set!";
         CV_Error(CV_StsError, error_message);
     }
-    qDebug()<<"训练模型前";
     cv::Ptr<cv::face::LBPHFaceRecognizer> model = cv::face::LBPHFaceRecognizer::create();
-    model->train(images, labels);
-    model->save("MyFaceLBPHModel.xml");
-    qDebug()<<"训练模型后";
+    try{
+        model->train(images, labels);
+    }catch(cv::Exception &e){
+
+    }
+
+    model->save("MyFaceLBPHModel1.xml");
     emit reload();
 
     getchar();
@@ -120,6 +121,10 @@ void threadFaceRecord::create_csv(){
     QString BASE_PATH = videoPath;
     QString SEPARATOR = ";";
     QFile outFile(BASE_PATH+"at.txt");
+
+    outFile.open(QFile::WriteOnly|QFile::Truncate);
+    outFile.close();
+
     if (!outFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
     {
         qDebug() << "Failed to open file for writing";
@@ -133,6 +138,11 @@ void threadFaceRecord::create_csv(){
     {
         QString subject_path = it.next();
         QDir subjectDir(subject_path);
+        qDebug()<<subject_path<<"  "<<subjectDir;
+        QStringList stringlist = subject_path.split("/");
+        //DataBase::instance()->addToStuInfo(label,name,gender,number,age.toInt(),c);
+        //DataBase::instance()->getId_stuNumber(stringlist.at(1).split("_").at(1));
+        DataBase::instance()->updateId_stuNumber(stringlist.at(1).split("_").at(1),label);
         subjectDir.setFilter(QDir::Files | QDir::NoDotAndDotDot);
         QFileInfoList files = subjectDir.entryInfoList();
         foreach (QFileInfo file, files)

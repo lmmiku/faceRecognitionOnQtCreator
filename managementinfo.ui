@@ -225,54 +225,41 @@
        </rect>
       </property>
      </widget>
-     <widget class="QPushButton" name="deleteUser">
+     <widget class="QWidget" name="">
       <property name="geometry">
        <rect>
-        <x>820</x>
+        <x>780</x>
         <y>50</y>
-        <width>75</width>
-        <height>23</height>
+        <width>121</width>
+        <height>110</height>
        </rect>
       </property>
-      <property name="text">
-       <string>删除用户</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="derive">
-      <property name="geometry">
-       <rect>
-        <x>820</x>
-        <y>80</y>
-        <width>75</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>导出考勤表</string>
-      </property>
-     </widget>
-     <widget class="QDateEdit" name="date">
-      <property name="geometry">
-       <rect>
-        <x>780</x>
-        <y>110</y>
-        <width>110</width>
-        <height>22</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="fflush">
-      <property name="geometry">
-       <rect>
-        <x>780</x>
-        <y>140</y>
-        <width>111</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>刷新考勤信息</string>
-      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QPushButton" name="derive">
+         <property name="text">
+          <string>导出考勤表</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateEdit" name="date"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="fflush">
+         <property name="text">
+          <string>刷新考勤信息</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="update">
+         <property name="text">
+          <string>修改为已打卡</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>

@@ -127,7 +127,7 @@ int threadFaceRecong::Predict(cv::Mat src_image){
 }
 
 void threadFaceRecong::reloadModel(){
-    model->read("MyFaceLBPHModel.xml");
+    model->read("MyFaceLBPHModel1.xml");
 }
 
 int threadFaceRecong::putString(cv::Mat &img, QString text, QPoint org, QFont font, QPen pen){
@@ -182,6 +182,7 @@ void threadFaceRecong::facerecong(cv::Mat frame){
 
         str = DataBase::instance()->getInfoFromStuInfo(Predict(pImage_roi[0])).toLocal8Bit().toStdString();
         QString stuNumber = DataBase::instance()->getStuNumber(Predict(pImage_roi[0]));
+        qDebug()<<QString::fromStdString(str)<<"  "<<stuNumber;
         if(str == ""){
             str = "ERROR";
             qDebug()<<"发送错误信号";

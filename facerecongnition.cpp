@@ -179,8 +179,8 @@ faceRecongnition::faceRecongnition(QString account,QWidget *parent): QWidget(par
         QString stuNumber = QInputDialog::getText(this,"删除用户","输入学号",QLineEdit::Normal,"",&ok);
         if(ok && !stuNumber.isEmpty()){
             QMessageBox::information(nullptr,"删除用户","删除用户"+DataBase::instance()->getName(stuNumber)+"成功!");
+            DeleteFileOrFolder(QString("video/"+DataBase::instance()->getName(stuNumber)+"_"+stuNumber));
             DataBase::instance()->deleteUserFromStuInfo(stuNumber);
-            qDebug()<<DeleteFileOrFolder(QString("video/"+DataBase::instance()->getName(stuNumber)+"_"+stuNumber));
         }
     });
 }
@@ -307,6 +307,7 @@ bool faceRecongnition::eventFilter(QObject *watched, QEvent *event){
 
 bool faceRecongnition::DeleteFileOrFolder(const QString &strPath)//要删除的文件夹或文件的路径
 {
+    qDebug()<<strPath;
     if (strPath.isEmpty() || !QDir().exists(strPath))//是否传入了空的路径||路径是否存在
         return false;
 

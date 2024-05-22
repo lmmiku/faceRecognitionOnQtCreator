@@ -36,24 +36,24 @@ managementInfo::managementInfo(QString account,QWidget*parent):QWidget(parent),u
         });
     });
 
-    //删除用户
-    connect(ui->deleteUser,&QPushButton::clicked,this,[=](){
-        QList<QTableWidgetItem*> items = ui->infomation->selectedItems();
+//    //删除用户
+//    connect(ui->deleteUser,&QPushButton::clicked,this,[=](){
+//        QList<QTableWidgetItem*> items = ui->infomation->selectedItems();
 
-        if(items.size() > 0){
-            int row = ui->infomation->row(items[0]);
-            qDebug()<<row;
-            if (row != -1){
-                QString name = ui->infomation->item(row,0)->text();
-                DeleteFileOrFolder(QString("video/"+ui->infomation->item(row,0)->text()+"_"+ui->infomation->item(row,2)->text()));
-                DataBase::instance()->deleteUserFromStuInfo(ui->infomation->item(row,2)->text());
-                ui->infomation->removeRow(row);
-                QMessageBox::information(nullptr,"删除用户","删除用户"+name+"成功!");
-            }
-        }
-        //this->initial();
-        emit reTrain();
-    });
+//        if(items.size() > 0){
+//            int row = ui->infomation->row(items[0]);
+//            qDebug()<<row;
+//            if (row != -1){
+//                QString name = ui->infomation->item(row,0)->text();
+//                DeleteFileOrFolder(QString("video/"+ui->infomation->item(row,0)->text()+"_"+ui->infomation->item(row,2)->text()));
+//                DataBase::instance()->deleteUserFromStuInfo(ui->infomation->item(row,2)->text());
+//                ui->infomation->removeRow(row);
+//                QMessageBox::information(nullptr,"删除用户","删除用户"+name+"成功!");
+//            }
+//        }
+//        //this->initial();
+//        emit reTrain();
+//    });
 
     //导出考勤情况表
     connect(ui->derive,&QPushButton::clicked,this,[=](){
@@ -64,7 +64,18 @@ managementInfo::managementInfo(QString account,QWidget*parent):QWidget(parent),u
     connect(ui->fflush,&QPushButton::clicked,this,[=](){
         this->fflushView();
     });
-    emit ui->fflush->clicked();
+    //emit ui->fflush->clicked();
+
+    //修改为已打卡
+    connect(ui->update,&QPushButton::clicked,this,[=](){
+        QList<QTableWidgetItem*> items = ui->infomation->selectedItems();
+        if(items.size() > 0){
+            int row = ui->infomation->row(items[0]);
+            if (row != -1){
+                DataBase::instance()->updateState_stuNumbe(ui->infomation->item(row,2)->text());
+            }
+        }
+    });
 }
 
 void managementInfo::deriveTab(){
@@ -106,6 +117,8 @@ void managementInfo::initial(){
 }
 
 void managementInfo::fflushView(){
+    ui->infomation->clearContents();
+    ui->infomation->setRowCount(0);
     int state1 = 0;int state2 = 0;int state3 = 0;
     //tabwidget数据初始化
     QVector<QString> idInfo = DataBase::instance()->getInfoFromAdminInfo(account);
@@ -114,7 +127,8 @@ void managementInfo::fflushView(){
         std::tuple<int,QString,QString,QString,int,QString> info = DataBase::instance()->getInfoFromId(stuNumber);
         std::tuple<QString,QString> t = DataBase::instance()->getAttendanceInfo(ui->date->date(),std::get<3>(info));
         if(t == std::tuple<QString,QString>{}){
-            continue;
+            t = std::make_tuple("未打卡","");
+
         }
         int rowCount = ui->infomation->rowCount();
         ui->infomation->insertRow(rowCount);
@@ -144,10 +158,12 @@ void managementInfo::fflushView(){
     }
 
     //pieseries数据初始化
-    if(pie_series!= nullptr){
-        delete pie_series;
-        pie_series = nullptr;
+    if(pie_series != nullptr){
+        ui->pie_widget->chart()->removeAllSeries();
+//        delete pie_series;
+//        pie_series = nullptr;
     }
+
     pie_series = new QPieSeries(ui->pie_widget);
     ui->pie_widget->setRenderHint(QPainter::Antialiasing);
     ui->pie_widget->chart()->setTheme(QChart::ChartThemeQt);

@@ -164,7 +164,7 @@ void LiveBlink::bioassay(){
 
             //显示眨眼次数
             char eyeBuf[100] = { 0 };
-            sprintf(eyeBuf, "eye count: %d", reyeIndex);
+            sprintf(eyeBuf, "face", reyeIndex);
             cv::putText(frame, eyeBuf, cv::Point(0, 45), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
             emit imageToView(Mat2Image(frame));
         }else{

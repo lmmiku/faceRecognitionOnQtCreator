@@ -207,10 +207,9 @@ QString DataBase::getName(QString stuNumber){
     QString select = QString("SELECT stuName FROM stuInfo WHERE stuNumber = '%1'").arg(stuNumber);
     if(!query.exec(select)){
         qDebug() << "Error:getInfoFromStuInfo->Fail to select data. " << query.lastError();
-    }else{
-        if(query.next()){
-            return query.value(0).toString();
-        }
+    }
+    if(query.next()){
+        return query.value(0).toString();
     }
     return "";
 }
@@ -274,6 +273,24 @@ bool DataBase::insertclassScheduleInfo(QString account,QVector<std::tuple<QStrin
             qDebug() << "Error:insertclassScheduleInfo->Fail to insert data. " << query.lastError();
             return false;
         }
+    }
+    return true;
+}
+
+bool DataBase::updateId_stuNumber(QString stuNumber,int id){
+    QString update = QString("UPDATE stuInfo SET id = %1 WHERE stuNumber = '%2'").arg(id).arg(stuNumber);
+    if(!query.exec(update)){
+        qDebug() << "Error:updateId_stuNumber->Fail to update data. " << query.lastError();
+        return false;
+    }
+    return true;
+}
+
+bool DataBase::updateState_stuNumbe(QString stuNumber){
+    QString update = QString("UPDATE attendanceInfo SET state = '%1' WHERE stuNumber = '%2'").arg("已打卡").arg(stuNumber);
+    if(!query.exec(update)){
+        qDebug() << "Error:updateState_stuNumbe->Fail to update data. " << query.lastError();
+        return false;
     }
     return true;
 }

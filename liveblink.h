@@ -12,6 +12,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QImage>
+#include <QThread>
 #include "fonts.h"
 #include "gui_core_kernel_1.h"
 

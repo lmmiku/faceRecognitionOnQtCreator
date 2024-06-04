@@ -130,9 +130,9 @@ void LiveBlink::bioassay(){
 //            sprintf(mouthBuf, "mouth couent : %d", mouthIndex);
 //            cv::putText(frame, mouthBuf, cv::Point(0, 20), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
 
-
+          qDebug()<<leyeEVR << reyeEVR;
             //记录左眼眨眼次数
-            if (leyeEVR > 3.0) {
+            if (leyeEVR > 3.2) {
                 //闭眼
                 counter_leye += 1;
             }
@@ -158,9 +158,9 @@ void LiveBlink::bioassay(){
             }
 
             //取最小值
-            if (reyeIndex > leyeIndex) {
-                reyeIndex = leyeIndex;
-            }
+//            if (reyeIndex > leyeIndex) {
+//                reyeIndex = leyeIndex;
+//            }
 
             //显示眨眼次数
             char eyeBuf[100] = { 0 };
@@ -171,12 +171,14 @@ void LiveBlink::bioassay(){
             emit imageToView(Mat2Image(frame));
         }
         if(reyeIndex > 0){
-//            qDebug()<<reyeIndex<<"发送信号";
+            qDebug()<<reyeIndex<<"发送信号";
 //            cap.release();
+            emit faceImage(frame);
             emit isLiving(true);
 
-            emit faceImage(frame);
+
             reyeIndex = 0;
+            //QThread::msleep(500);
 //            return ;
         }
 //        cv::imshow("frame",frame);

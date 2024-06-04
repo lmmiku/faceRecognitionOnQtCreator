@@ -50,7 +50,7 @@ void threadFaceRecord::faceRecord(QString name,QString gender,QString number,QSt
                 cv::rectangle(frame, faces[i], cv::Scalar(255, 0, 0), 2, 8, 0);
             }
             //当只有一个人脸时，开始拍照
-            if (faces.size() == 1 /*&& HOG_SVM->predict(frame) == 1*/){
+            if (faces.size() != 0 /*&& HOG_SVM->predict(frame) == 1*/){
                 cv::Mat faceROI = frame_gray(faces[0]);//在灰度图中将圈出的脸所在区域裁剪出
                 cv::resize(faceROI, myFace, cv::Size(92, 112));//将兴趣域size为92*112
                 putText(frame, QString::number(pic_num).toStdString(), faces[0].tl(), 3, 1.2, (0, 0, 225), 2, 0);//在 faces[0].tl()的左上角上面写序号

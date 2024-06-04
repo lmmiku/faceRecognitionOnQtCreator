@@ -12,6 +12,7 @@ threadFaceRecong::threadFaceRecong(){
 //        this->isLiving = flag;
 //    });
     connect(live,&LiveBlink::faceImage,this,[=](cv::Mat frame){
+        qDebug()<<"接收到活体信号";
         facerecong(frame);
     });
 }
@@ -157,6 +158,7 @@ int threadFaceRecong::putString(cv::Mat &img, QString text, QPoint org, QFont fo
 
 void threadFaceRecong::facerecong(cv::Mat frame){
         if(frame.empty()){
+            qDebug()<<"图像为空";
             return;
         }
         cv::Mat gray;
@@ -171,7 +173,7 @@ void threadFaceRecong::facerecong(cv::Mat frame){
         equalizeHist(gray, gray); //变换后的图像进行直方图均值化处理
         //检测人脸
         cascade.detectMultiScale(gray, faces,1.1, 4, 0|CV_HAAR_DO_ROUGH_SEARCH,cv::Size(30, 30), cv::Size(500, 500));
-        if(faces.size() != 1){return;}
+        //if(faces.size() != 1){qDebug()<<"人脸图像不为1";return;}
         cv::Mat* pImage_roi = new cv::Mat[faces.size()];
         cv::Mat face;
         cv::Point text_lb;//文本写在的位置
@@ -192,6 +194,7 @@ void threadFaceRecong::facerecong(cv::Mat frame){
             QDateTime startTime = QDateTime::currentDateTime();
             for(std::tuple<QDateTime,QDateTime,QDateTime> t:attendanceTime){
                 if(startTime.toString("hh").toInt() >= std::get<0>(t).toString("hh").toInt() && startTime.toString("hh").toInt() <= std::get<2>(t).toString("hh").toInt()){
+                    qDebug()<<"进入时间";
                     if(startTime.toString("mm").toInt() >= std::get<0>(t).toString("mm").toInt() && startTime.toString("mm").toInt() <= std::get<1>(t).toString("mm").toInt()){
                         qDebug()<<"发送打卡成功信号";
                         emit PunchSuccess(stuNumber);

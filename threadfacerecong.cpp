@@ -128,7 +128,7 @@ int threadFaceRecong::Predict(cv::Mat src_image){
 }
 
 void threadFaceRecong::reloadModel(){
-    model->read("MyFaceLBPHModel1.xml");
+    model->read("MyFaceLBPHModel.xml");
 }
 
 int threadFaceRecong::putString(cv::Mat &img, QString text, QPoint org, QFont font, QPen pen){
